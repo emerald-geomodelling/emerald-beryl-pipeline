@@ -1,0 +1,50 @@
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
+jobs:
+  py310:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        pip install nose2[coverage_plugin]
+        pip install "git+https://${{ secrets.deployment_user }}@github.com/emerald-geomodelling/simpeg.git@simpleem3"
+        pip install "git+https://${{ secrets.deployment_user }}@github.com/emerald-geomodelling/EmeraldProcessing.git"
+        pip install utm
+        pip install pyMKL
+        pip install -e .
+    - name: Test with nose2
+      run: |
+        nose2 --coverage-report=xml --with-coverage --plugin nose2.plugins.junitxml --junit-xml -v -s tests pipeline
+    - name: JUnit version fix
+      if: always()
+      run: |
+        {
+          echo '<?xml version="1.0" encoding="UTF-8"?>'
+          grep "<testsuite " nose2-junit.xml | sed -e "s+testsuite+testsuites+g";
+          cat nose2-junit.xml
+          echo '</testsuites>'
+        } > x
+        mv x nose2-junit.xml
+        cat nose2-junit.xml
+    - name: Generate badges
+      if: always()
+      uses: gaelgirodon/ci-badges-action@v1
+      with:
+        gist-id: 9e15232e12bf2ddf537185b43ca2060f
+        token: ${{ secrets.GIST_TOKEN }}
+    - name: Clear badge cache
+      if: always()
+      shell: bash
+      run: |
+        urls=$(curl -sLk https://${{ secrets.deployment_user }}@github.com/${{github.repository_owner}}/${{ github.event.repository.name }}/tree/${{ steps.branch-name.outputs.current_branch }}|grep -Eo "(http|https)://camo.githubusercontent.com[a-zA-Z0-9./?=_%:-]*")
+        while IFS= read -r line; do curl -X PURGE $line ; done <<< $urls
+        

@@ -1,0 +1,7 @@
+importer:
+  args:
+    files:
+      gexfile: file:///home/redhog/Projects/Emerald/experimental-inversion-gui/dependencies/emerald-beryl-pipeline/tests/data/20201231_20023_IVF_SkyTEM304_SKB.gex
+      xyzfile: file:///home/redhog/Projects/Emerald/experimental-inversion-gui/dependencies/emerald-beryl-pipeline/tests/data/aem_processed_data_foothill_central_valley.100101.0.xyz
+    projection: 32611
+  name: SkyTEM XYZ

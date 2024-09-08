@@ -1,0 +1,97 @@
+- msg: Loading...
+  time: 2024-09-08 12:48:02,729
+
+- msg: Inverting...
+  time: 2024-09-08 12:48:03,055
+
+- msg: Inversion step
+  status: start
+  step: 0
+  time: 2024-09-08 12:48:06,894
+
+- msg: Inversion step
+  status: initialize
+  step: 1
+  time: 2024-09-08 12:50:03,649
+
+- beta: 53.25634778790044
+  f: 7067043.197443786
+  iter: 1
+  msg: Inversion step
+  phi_d: 1401431.1488757506
+  phi_m: 1073.2530685447264
+  phi_m_scaled: 57157.5386828493
+  rmse_d: 28.404423148344073
+  rmse_m: 0.786051788526474
+  rmse_m_scaled: 5.736365963164829
+  rmse_total: 28.977873435667092
+  status: update
+  step: 3
+  time: 2024-09-08 12:50:12,205
+  '|proj(x-g)-x|': 294165.53311823006
+
+- beta: 26.62817389395022
+  f: 1458588.6875586
+  iter: 2
+  msg: Inversion step
+  phi_d: 560990.1958439258
+  phi_m: 5528.802080480226
+  phi_m_scaled: 147221.90322426122
+  rmse_d: 17.97122685652819
+  rmse_m: 1.7840852901897382
+  rmse_m_scaled: 9.206325052356016
+  rmse_total: 20.192112710126153
+  status: update
+  step: 4
+  time: 2024-09-08 12:50:26,899
+  '|proj(x-g)-x|': 53727.33874206844
+
+- beta: 13.31408694697511
+  f: 708212.0990681871
+  iter: 3
+  msg: Inversion step
+  phi_d: 475338.6646852411
+  phi_m: 2110.3810668815536
+  phi_m_scaled: 28097.797015711098
+  rmse_d: 16.542519745172587
+  rmse_m: 1.1022510768043645
+  rmse_m_scaled: 4.021945915100086
+  rmse_total: 17.024423880513993
+  status: update
+  step: 5
+  time: 2024-09-08 12:50:41,174
+  '|proj(x-g)-x|': 44599.53355155815
+
+- beta: 6.657043473487555
+  f: 503436.4617009522
+  iter: 4
+  msg: Inversion step
+  phi_d: 269449.00748275203
+  phi_m: 10001.432824897884
+  phi_m_scaled: 66579.97311251065
+  rmse_d: 12.454846656181196
+  rmse_m: 2.3995577246602977
+  rmse_m_scaled: 6.1911581572328025
+  rmse_total: 13.908761431445225
+  status: update
+  step: 6
+  time: 2024-09-08 12:51:05,590
+  '|proj(x-g)-x|': 17640.85692947163
+
+- msg: Inversion step
+  status: end
+  step: 6
+  time: 2024-09-08 12:51:31,126
+
+- msg: 'Inversion time(hr): 0.0584'
+  time: 2024-09-08 12:51:34,521
+
+- msg: Saving...
+  time: 2024-09-08 12:51:34,521
+
+- msg: Save done
+  time: 2024-09-08 12:51:37,269
+
+- msg: DONE
+  time: 2024-09-08 12:51:37,269
+

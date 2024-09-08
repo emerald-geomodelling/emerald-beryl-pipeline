@@ -1,0 +1,15 @@
+- msg: Read config
+  time: 2024-09-08 12:36:14,048
+
+- msg: Download files
+  time: 2024-09-08 12:36:14,050
+
+- msg: Import data
+  time: 2024-09-08 12:36:14,050
+
+- msg: Write and upload data
+  time: 2024-09-08 12:36:14,178
+
+- msg: DONE
+  time: 2024-09-08 12:36:14,460
+

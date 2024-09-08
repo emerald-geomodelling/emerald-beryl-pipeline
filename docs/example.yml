@@ -1,0 +1,10 @@
+system:
+  name: simpegsimpleem.SingleMomentTEMXYZSystem
+  args:
+    area: 340
+    i_max: 1
+    alpha_s: 10000000000
+    alpha_r: 100.
+    alpha_z: 1.
+
+data: gs://experimental-pipeline-inversion/measured.xyz

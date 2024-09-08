@@ -1,0 +1,7 @@
+data:
+  args:
+    data: file:///home/redhog/Projects/Emerald/experimental-inversion-gui/dependencies/emerald-beryl-pipeline/tests/data/import/out.xyz
+    sidecar: null
+    system_data: file:///home/redhog/Projects/Emerald/experimental-inversion-gui/dependencies/emerald-beryl-pipeline/tests/data/import/out.gex
+  name: emeraldprocessing.pipeline.ProcessingData
+steps: []

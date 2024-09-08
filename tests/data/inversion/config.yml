@@ -1,0 +1,8 @@
+data: file:///home/redhog/Projects/Emerald/experimental-inversion-gui/dependencies/emerald-beryl-pipeline/tests/data/processing/processed.xyz
+system:
+  args:
+    directives__irls: true
+    optimizer__max_iter: 4
+    optimizer__max_iter_cg: 2
+  name: Dual moment TEM
+system_data: file:///home/redhog/Projects/Emerald/experimental-inversion-gui/dependencies/emerald-beryl-pipeline/tests/data/processing/processed.gex

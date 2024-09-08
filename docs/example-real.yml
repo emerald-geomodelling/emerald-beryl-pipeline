@@ -1,0 +1,6 @@
+system:
+  name: simpegsimpleem.DualMomentTEMXYZSystem
+  args: {}
+
+system_data: gs://experimental-pipeline-inversion/data/real.gex
+data: gs://experimental-pipeline-inversion/data/real.xyz
