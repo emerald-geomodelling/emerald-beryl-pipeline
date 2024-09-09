@@ -31,8 +31,14 @@ setuptools.setup(
         "pydantic",
         "poltergust-luigi-utils>=0.0.11",
         "emerald-monitor @ git+https://github.com/emerald-geomodelling/emerald-monitor",
-        "python-slugify"
+        "python-slugify",
+        "utm"
     ],
+    extras_require={
+        'all': [
+            "emeraldprocessing @ git+https://github.com/emerald-geomodelling/emerald-processing-em.git",
+            "simpeg @ git+https://github.com/emerald-geomodelling/simpeg.git@simpleem3",
+        ]},
     entry_points = {
         'beryl_pipeline.import': [
             'SkyTEM XYZ=beryl_pipeline.file_import:LibaarhusXYZImporter'

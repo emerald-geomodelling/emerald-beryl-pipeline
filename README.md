@@ -5,6 +5,20 @@
 
 Luigi based pipeline to run inversions using [our simplified SimPEG wrapper](https://github.com/emerald-geomodelling/experimental-simpeg-ext)
 
+# Installation
+
+Clone this repo, then run `pip install .[all]`. Note the `[all]`.
+Without this, emerald-processing-em and simpeg/simpleem won't be
+installed, and you'll have to install some version of these manually.
+
+# Documentation
+
+* Documentation on how to [run all the pipelines from anotebook](docs/run%20processing%20inversion%20luigi.ipynb)
+* Documentation on how to [extract the API documentation](docs/run%20introspection.ipynb) used to generate the front end UI
+  * This should be used to test any changes / additions to e.g. processing pipeline filters
+
+# Running from the command line
+
 To run this pipeline locally:
 
 ```
@@ -13,12 +27,6 @@ luigi --module beryl_pipeline.inversion Inversion --inversion-name=file:///some/
 
 This assumes you've copied `docs/example-real.yml` to `/some/temp/dir/config.yml`.
 
-
-# Documentation
-
-* Documentation on how to [run all the pipelines from anotebook](docs/run%20processing%20inversion%20luigi.ipynb)
-* Documentation on how to [extract the API documentation](docs/run%20introspection.ipynb) used to generate the front end UI
-  * This should be used to test any changes / additions to e.g. processing pipeline filters
 
 # Unit tests
 
