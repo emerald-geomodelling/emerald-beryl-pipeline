@@ -27,6 +27,13 @@ luigi --module beryl_pipeline.inversion Inversion --inversion-name=file:///some/
 
 This assumes you've copied `docs/example-real.yml` to `/some/temp/dir/config.yml`.
 
+# Cloud computing support
+
+All the pipeline tools use the [luigi OpenerTarget](https://luigi.readthedocs.io/en/stable/api/luigi.contrib.opener.html), which allows for accessing files on a host of file storage options,
+including gcs and s3 by just using the appropriate URL schemes.
+
+Note: There are two types of parallelization utilized by this pipeline system: Multiple luigi tasks can be run in parallel if multiple workers are supplied, potentially using multiple computers.
+Additionally, SimPEG inversions are parallelized using threading, and can utlize any number of CPU:s available on a single computer. 
 
 # Unit tests
 
