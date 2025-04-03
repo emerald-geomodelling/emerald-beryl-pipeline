@@ -29,7 +29,7 @@ This assumes you've copied `docs/example-real.yml` to `/some/temp/dir/config.yml
 
 # Running from a notebook
 
-The docs subdirectory has an example notebook that runs [processing and inversion](docs/run%20processing%20inversion%20luigi.ipynb], as well as an [introspection notebook](docs/run%20introspection.ipynb) that can be used to extract available parameters for all the processing filters as well as for the inversion function.
+The docs subdirectory has an example notebook that runs [processing and inversion](docs/run%20processing%20inversion%20luigi.ipynb), as well as an [introspection notebook](docs/run%20introspection.ipynb) that can be used to extract available parameters for all the processing filters as well as for the inversion function.
 
 # Cloud computing support
 
