@@ -19,7 +19,7 @@ setuptools.setup(
         "oauth2client>=4.1.3",
         "google-api-core>=1.25.0",
         "google-api-python-client>=1.12.5",
-        "swaggerspect >= 0.0.13",
+        "swaggerspect >= 0.1.4",
         "luigi",
         "pyyaml",
         "pymkl",
