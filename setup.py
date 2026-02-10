@@ -32,7 +32,8 @@ setuptools.setup(
         "poltergust-luigi-utils>=0.0.11",
         "emerald-monitor @ git+https://github.com/emerald-geomodelling/emerald-monitor",
         "python-slugify",
-        "utm"
+        "utm",
+        "emerald-helitem-converter @ git+https://github.com/emerald-geomodelling/emerald-helitem-converter.git",
     ],
     extras_require={
         'all': [
@@ -41,7 +42,8 @@ setuptools.setup(
         ]},
     entry_points = {
         'beryl_pipeline.import': [
-            'SkyTEM XYZ=beryl_pipeline.file_import:LibaarhusXYZImporter'
+            'SkyTEM XYZ=beryl_pipeline.file_import:LibaarhusXYZImporter',
+            'HeliTEM2LibAarhus=beryl_pipeline.file_import:HeliTEM2LibAarhusImporter',
         ],
         'simpeg.static_instrument': [
             'Dual moment TEM=SimPEG.electromagnetics.utils.static_instrument.dual:DualMomentTEMXYZSystem',

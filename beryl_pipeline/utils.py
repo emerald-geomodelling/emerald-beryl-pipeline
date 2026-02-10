@@ -10,7 +10,7 @@ from . import localize
 
 DB_URL = os.environ.get("DB_URL")
 
-systems = {entry.name: entry for entry in importlib.metadata.entry_points()["simpeg.static_instrument"]}
+systems = {entry.name: entry for entry in importlib.metadata.entry_points(group="simpeg.static_instrument")}
 
 def load_fn(name):
     mod, fn = name.rsplit(".", 1)

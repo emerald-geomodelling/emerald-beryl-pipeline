@@ -20,6 +20,36 @@ import slugify
 from emeraldprocessing.tem.data_keys import inuse_key_prefix
 
 
+def _strip_missing_channel_refs(steps, available_channels, log_fn=None):
+    """Strip references to missing channels from processing step configs.
+
+    Single-moment data (e.g., HeliTEM) only has Gate_Ch01. Processing steps
+    like cull_on_geometry have defaults that include Gate_Ch02, which would
+    crash if applied to single-moment data. This function removes channel
+    references from step parameters that don't exist in the loaded data.
+    """
+    for step in steps:
+        if not isinstance(step, dict):
+            continue
+        args = step.get('args', {})
+        if not isinstance(args, dict):
+            continue
+        for param_name, param_value in list(args.items()):
+            if isinstance(param_value, dict):
+                keys_to_remove = [
+                    k for k in param_value
+                    if k.startswith('Gate_Ch') and k not in available_channels
+                ]
+                for k in keys_to_remove:
+                    del param_value[k]
+                    if log_fn:
+                        log_fn(
+                            f"Stripped '{k}' from step "
+                            f"'{step.get('name', '?')}.{param_name}' "
+                            f"(channel not present in data)"
+                        )
+
+
 class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
     processing_name = luigi.Parameter()
     logging_formatter_yaml = True
@@ -53,6 +83,16 @@ class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
                     data.orig_xyz_by_line = data.orig_xyz.split_by_line()
 
                     self.log("Processing")
+
+                    # Strip references to channels not in the data (e.g., Gate_Ch02
+                    # defaults on single-moment HeliTEM data)
+                    available_channels = {
+                        k for k in data.xyz.layer_data.keys()
+                        if k.startswith('Gate_Ch')
+                    }
+                    _strip_missing_channel_refs(
+                        config["steps"], available_channels, log_fn=self.log
+                    )
 
                     data.process(config["steps"])
 
