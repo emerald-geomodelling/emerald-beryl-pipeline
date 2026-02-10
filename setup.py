@@ -33,12 +33,14 @@ setuptools.setup(
         "emerald-monitor @ git+https://github.com/emerald-geomodelling/emerald-monitor",
         "python-slugify",
         "utm",
-        "emerald-helitem-converter @ git+https://github.com/emerald-geomodelling/emerald-helitem-converter.git",
     ],
     extras_require={
         'all': [
             "emeraldprocessing @ git+https://github.com/emerald-geomodelling/emerald-processing-em.git",
             "simpeg @ git+https://github.com/emerald-geomodelling/simpeg.git@simpleem3",
+        ],
+        'helitem': [
+            "emerald-helitem-converter @ git+https://github.com/emerald-geomodelling/emerald-helitem-converter.git",
         ]},
     entry_points = {
         'beryl_pipeline.import': [
