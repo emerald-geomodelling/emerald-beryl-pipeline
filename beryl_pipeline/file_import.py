@@ -54,7 +54,8 @@ class LibaarhusXYZImporter(libaarhusxyz.Survey):
         alcfile = files.get("alcfile")
 
         assert isinstance(projection, int) and projection > 0, "Invalid projection, please provide a valid projection"
-        assert isinstance(scalefactor, float) and scalefactor != 0, "Invalid scalefactor, please provide a valid scalefactor"
+        scalefactor = float(scalefactor)
+        assert scalefactor != 0, "Invalid scalefactor, please provide a valid scalefactor"
         assert xyzfile is not None, "Missing xyz file"
         assert gexfile is not None, "Missing gex file"
         
@@ -163,7 +164,8 @@ class HeliTEM2LibAarhusImporter(libaarhusxyz.Survey):
         gexfile = files.get("gexfile")
 
         assert isinstance(projection, int) and projection > 0, "Invalid projection, please provide a valid projection"
-        assert isinstance(scalefactor, float) and scalefactor != 0, "Invalid scalefactor, please provide a valid scalefactor"
+        scalefactor = float(scalefactor)
+        assert scalefactor != 0, "Invalid scalefactor, please provide a valid scalefactor"
         assert ascfile is not None, "Missing .asc file"
         assert gexfile is not None, "Missing .gex file"
 
