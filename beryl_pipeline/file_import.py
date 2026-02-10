@@ -79,9 +79,10 @@ def _load_helitem_gex(gexfile):
     """Load a HeliTEM GEX file, adding fields required by libaarhusxyz if missing.
 
     XCalibur HeliTEM GEX files are Aarhus Workbench compatible but may lack
-    TransmitterMoment and TxLoopArea which libaarhusxyz.GEX requires.
-    This function parses the raw GEX, adds the missing fields, computes
-    ApproxDipoleMoment, and returns a libaarhusxyz.GEX object.
+    TransmitterMoment, TxLoopArea, and NoGates which libaarhusxyz.GEX and the
+    Beryl GUI frontend require. This function parses the raw GEX, adds the
+    missing fields, computes ApproxDipoleMoment, and returns a libaarhusxyz.GEX
+    object.
     """
     import numpy as np
     import re
@@ -121,6 +122,15 @@ def _load_helitem_gex(gexfile):
         channel_key = f"Channel{channel}"
         if "TransmitterMoment" not in gex_dict[channel_key]:
             gex_dict[channel_key]["TransmitterMoment"] = ""
+
+    # Add NoGates to each Channel if missing (GUI frontend requires it)
+    for channel in range(1, 1 + number_channels):
+        channel_key = f"Channel{channel}"
+        if "NoGates" not in gex_dict[channel_key]:
+            tx_mom = gex_dict[channel_key].get("TransmitterMoment", "")
+            gate_key = f"GateTime{tx_mom}" if f"GateTime{tx_mom}" in gex_dict["General"] else "GateTime"
+            if gate_key in gex_dict["General"]:
+                gex_dict[channel_key]["NoGates"] = len(gex_dict["General"][gate_key])
 
     # Compute ApproxDipoleMoment (same logic as libaarhusxyz.gex._parse)
     for channel in range(1, 1 + number_channels):
