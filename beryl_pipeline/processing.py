@@ -27,27 +27,29 @@ def _strip_missing_channel_refs(steps, available_channels, log_fn=None):
     like cull_on_geometry have defaults that include Gate_Ch02, which would
     crash if applied to single-moment data. This function removes channel
     references from step parameters that don't exist in the loaded data.
+
+    Steps use the format: [{"modulename.function_name": {"arg1": val, ...}}, ...]
     """
     for step in steps:
         if not isinstance(step, dict):
             continue
-        args = step.get('args', {})
-        if not isinstance(args, dict):
-            continue
-        for param_name, param_value in list(args.items()):
-            if isinstance(param_value, dict):
-                keys_to_remove = [
-                    k for k in param_value
-                    if k.startswith('Gate_Ch') and k not in available_channels
-                ]
-                for k in keys_to_remove:
-                    del param_value[k]
-                    if log_fn:
-                        log_fn(
-                            f"Stripped '{k}' from step "
-                            f"'{step.get('name', '?')}.{param_name}' "
-                            f"(channel not present in data)"
-                        )
+        for step_name, args in step.items():
+            if not isinstance(args, dict):
+                continue
+            for param_name, param_value in list(args.items()):
+                if isinstance(param_value, dict):
+                    keys_to_remove = [
+                        k for k in param_value
+                        if k.startswith('Gate_Ch') and k not in available_channels
+                    ]
+                    for k in keys_to_remove:
+                        del param_value[k]
+                        if log_fn:
+                            log_fn(
+                                f"Stripped '{k}' from step "
+                                f"'{step_name}.{param_name}' "
+                                f"(channel not present in data)"
+                            )
 
 
 class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
