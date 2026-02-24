@@ -12,6 +12,7 @@ import poltergust_luigi_utils.logging_task
 import typing
 import pydantic
 import importlib.metadata
+import numpy as np
 import pandas as pd
 import os
 import copy
@@ -84,7 +85,6 @@ def _load_helitem_gex(gexfile):
     missing fields, computes ApproxDipoleMoment, and returns a libaarhusxyz.GEX
     object.
     """
-    import numpy as np
     import re
     with open(gexfile) as f:
         lines = f.readlines()
@@ -166,7 +166,7 @@ class HeliTEM2LibAarhusImporter(libaarhusxyz.Survey):
         Parameters
         ----------
         scalefactor :
-            Data unit, 1 = SI units (default for HeliTEM)
+            Data unit (overridden to 1e-12 during normalisation)
         projection :
             EPSG code for the projection and chart datum of sounding locations
         """
@@ -199,6 +199,28 @@ class HeliTEM2LibAarhusImporter(libaarhusxyz.Survey):
         xyz.model_info['scalefactor'] = scalefactor
         xyz.model_info['projection'] = projection
         xyz.normalize(naming_standard="alc")
+
+        # --- Normalise gate data to match SkyTEM internal convention ---
+        # HeliTEM raw data is dB/dt in nT/s. Convert to Tx-Rx normalised picovolts:
+        #   1. nT/s -> T/s (= V/m^2 for N=1 turn): x1e-9
+        #   2. Divide by per-sounding dipole moment: -> V/(A*m^4)
+        #   3. Scale to picovolts: x1e12
+        # Combined: stored = raw_nTs * 1e3 / DipoleMoment_per_sounding
+        gate_data = xyz.layer_data['Gate_Ch01']
+        dipole_moment = xyz.flightlines['DipoleMoment_Ch01']
+
+        # Broadcast per-sounding dipole moment across all gates
+        M_tiled = pd.DataFrame(
+            data=np.tile(dipole_moment.values, [gate_data.shape[1], 1]).T,
+            index=gate_data.index,
+            columns=gate_data.columns,
+        )
+
+        # Apply normalisation: nT/s -> pV/(A*m^4)
+        xyz.layer_data['Gate_Ch01'] = gate_data * 1e3 / M_tiled
+
+        # Override scalefactor to match normalised convention
+        xyz.model_info['scalefactor'] = 1e-12
 
         assert "projection" in xyz.model_info
         assert "scalefactor" in xyz.model_info
