@@ -52,6 +52,21 @@ def _strip_missing_channel_refs(steps, available_channels, log_fn=None):
                             )
 
 
+def _extract_affected_lines(steps):
+    """Extract affected_lines from the processing steps config.
+
+    Returns a set of line ID strings if found, or None if no step
+    declares affected_lines.
+    """
+    for step in reversed(steps):
+        if not isinstance(step, dict):
+            continue
+        for step_args in step.values():
+            if isinstance(step_args, dict) and "affected_lines" in step_args:
+                return set(str(l) for l in step_args["affected_lines"])
+    return None
+
+
 class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
     processing_name = luigi.Parameter()
     logging_formatter_yaml = True
@@ -74,7 +89,7 @@ class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
             with self.config_target().open("r") as f:
                 config = yaml.load(f, Loader=yaml.SafeLoader)
 
-            parent_url = config.get("parent_url")
+            parent_url = config.pop("parent_url", None)
 
             self.log("Download files")
 
@@ -108,16 +123,10 @@ class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
 
                     self.log("Write data")
 
-                    # Extract affected_lines from the last step if present
-                    affected_lines = None
-                    for step in reversed(config.get("steps", [])):
-                        if isinstance(step, dict):
-                            for step_args in step.values():
-                                if isinstance(step_args, dict) and "affected_lines" in step_args:
-                                    affected_lines = set(str(l) for l in step_args["affected_lines"])
-                                    break
-                        if affected_lines is not None:
-                            break
+                    # Extract affected_lines from the steps if present
+                    affected_lines = _extract_affected_lines(config["steps"])
+                    if affected_lines is not None and parent_url:
+                        self.log("Per-flightline optimization: %d affected lines" % len(affected_lines))
 
                     data.dump(
                         xyzfile = '%s/processed.xyz' % (tempdir,),
