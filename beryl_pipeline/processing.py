@@ -74,6 +74,8 @@ class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
             with self.config_target().open("r") as f:
                 config = yaml.load(f, Loader=yaml.SafeLoader)
 
+            parent_url = config.get("parent_url")
+
             self.log("Download files")
 
             with localize.localize(config) as config:
@@ -106,6 +108,16 @@ class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
 
                     self.log("Write data")
 
+                    # Extract affected_lines from the last step if present
+                    affected_lines = None
+                    for step in reversed(config.get("steps", [])):
+                        if isinstance(step, dict):
+                            for step_args in step.values():
+                                if isinstance(step_args, dict) and "affected_lines" in step_args:
+                                    affected_lines = set(str(l) for l in step_args["affected_lines"])
+                                    break
+                        if affected_lines is not None:
+                            break
 
                     data.dump(
                         xyzfile = '%s/processed.xyz' % (tempdir,),
@@ -115,18 +127,38 @@ class Processing(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
                         summaryfile = '%s/processed.summary.yml' % (tempdir,),
                         geojsonfile = '%s/processed.geojson' % (tempdir,))
 
+                    line_extensions = ['.xyz', '.gex', '.msgpack', '.diff.msgpack', '.summary.yml', '.geojson']
+
                     for fline, line_data in data.xyz.split_by_line().items():
                         sfline = slugify.slugify(str(fline), separator="_")
-                        fl_data = copy.copy(data)
-                        fl_data.xyz = line_data
-                        fl_data.orig_xyz = data.orig_xyz_by_line[fline]
-                        fl_data.dump(
-                            xyzfile = '%s/processed.%s.xyz' % (tempdir, sfline),
-                            gexfile = '%s/processed.%s.gex' % (tempdir, sfline),
-                            msgpackfile = '%s/processed.%s.msgpack' % (tempdir, sfline),
-                            diffmsgpackfile = '%s/processed.%s.diff.msgpack' % (tempdir, sfline),
-                            summaryfile = '%s/processed.%s.summary.yml' % (tempdir, sfline),
-                            geojsonfile = '%s/processed.%s.geojson' % (tempdir, sfline))
+
+                        if affected_lines is not None and parent_url and str(fline) not in affected_lines:
+                            # Unaffected line: copy per-line output from parent
+                            self.log("Copying unaffected line %s from parent" % fline)
+                            for ext in line_extensions:
+                                parent_file = '%s/processed.%s%s' % (parent_url, sfline, ext)
+                                local_file = '%s/processed.%s%s' % (tempdir, sfline, ext)
+                                try:
+                                    src = poltergust_luigi_utils.caching.CachingOpenerTarget(
+                                        parent_file,
+                                        format=luigi.format.NopFormat())
+                                    with src.open("r") as inf:
+                                        with open(local_file, "wb") as outf:
+                                            shutil.copyfileobj(inf, outf)
+                                except Exception as e:
+                                    self.log("Warning: could not copy %s from parent: %s" % (parent_file, e))
+                        else:
+                            # Affected line (or no per-flightline optimization): dump normally
+                            fl_data = copy.copy(data)
+                            fl_data.xyz = line_data
+                            fl_data.orig_xyz = data.orig_xyz_by_line[fline]
+                            fl_data.dump(
+                                xyzfile = '%s/processed.%s.xyz' % (tempdir, sfline),
+                                gexfile = '%s/processed.%s.gex' % (tempdir, sfline),
+                                msgpackfile = '%s/processed.%s.msgpack' % (tempdir, sfline),
+                                diffmsgpackfile = '%s/processed.%s.diff.msgpack' % (tempdir, sfline),
+                                summaryfile = '%s/processed.%s.summary.yml' % (tempdir, sfline),
+                                geojsonfile = '%s/processed.%s.geojson' % (tempdir, sfline))
                                 
             self.log("Done")
 
