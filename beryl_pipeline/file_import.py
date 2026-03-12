@@ -343,6 +343,13 @@ class Import(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
                         shutil.copy2(
                             '%s/out.gex' % (tempdir,),
                             '%s/galei_model.gex' % (tempdir,))
+                        # Per-flightline splits (needed for GUI binary API)
+                        for fline, line_data in galei_model.split_by_line().items():
+                            fline = slugify.slugify(str(fline), separator="_")
+                            _dump_model_xyz(line_data, tempdir, "galei_model.%s" % fline)
+                            shutil.copy2(
+                                '%s/out.gex' % (tempdir,),
+                                '%s/galei_model.%s.gex' % (tempdir, fline))
 
                 with self.output().open("w") as f:
                     f.write("DONE")                
