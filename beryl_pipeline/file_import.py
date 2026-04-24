@@ -3,6 +3,7 @@ import luigi.contrib.opener
 import luigi.format
 import libaarhusxyz
 import yaml
+import codecs
 import tempfile
 import shutil
 from . import utils
@@ -195,7 +196,17 @@ class HeliTEM2LibAarhusImporter(libaarhusxyz.Survey):
             # 2. Load converted output with libaarhusxyz
             xyz = libaarhusxyz.XYZ(str(xyz_path), alcfile=str(alc_path))
 
-        # 3. Set metadata and normalize
+            # 3. Check for GA-LEI model in converter output (before tmpdir cleanup)
+            self.galei_model_xyz = None
+            model_path = xyz_path.parent / (xyz_path.stem + '.galei_model.xyz')
+            if model_path.exists():
+                self.galei_model_xyz = libaarhusxyz.XYZ(str(model_path), normalize=True)
+                assert 'resistivity' in self.galei_model_xyz.layer_data, \
+                    "GA-LEI model missing resistivity layer_data"
+                assert 'height' in self.galei_model_xyz.layer_data, \
+                    "GA-LEI model missing height layer_data"
+
+        # 4. Set metadata and normalize
         xyz.model_info['scalefactor'] = scalefactor
         xyz.model_info['projection'] = projection
         xyz.normalize(naming_standard="alc")
@@ -225,11 +236,54 @@ class HeliTEM2LibAarhusImporter(libaarhusxyz.Survey):
         assert "projection" in xyz.model_info
         assert "scalefactor" in xyz.model_info
 
-        # 4. Load GEX (with HeliTEM compatibility preprocessing)
+        # 5. Load GEX (with HeliTEM compatibility preprocessing)
         gex = _load_helitem_gex(gexfile)
 
-        # 5. Initialize Survey base class
+        # 6. Initialize Survey base class
         libaarhusxyz.Survey.__init__(self, xyz, gex)
+
+
+class GALEIModelImporter(object):
+    """Import a GA-LEI inversion model from a .galei_model.xyz file.
+
+    Loads the model XYZ via libaarhusxyz and validates that it contains
+    the expected layer_data keys (resistivity, height).
+    """
+
+    def __init__(self, xyzfile):
+        self.xyz = libaarhusxyz.XYZ(xyzfile, normalize=True)
+        assert 'resistivity' in self.xyz.layer_data, \
+            "GA-LEI model missing resistivity layer_data"
+        assert 'height' in self.xyz.layer_data, \
+            "GA-LEI model missing height layer_data"
+
+    @property
+    def n_layers(self):
+        return self.xyz.layer_data['resistivity'].shape[1]
+
+    @property
+    def n_soundings(self):
+        return len(self.xyz.flightlines)
+
+
+def _dump_model_xyz(model_xyz, tempdir, name, gex=None):
+    """Write a model XYZ (and summary/msgpack) to the upload directory.
+
+    Parameters
+    ----------
+    model_xyz : libaarhusxyz.XYZ
+        The model data to write.
+    tempdir : str
+        Upload directory path.
+    name : str
+        Base filename (e.g. "galei_model").
+    gex : libaarhusxyz.GEX, optional
+        GEX to include in msgpack. If None, msgpack is written without GEX.
+    """
+    model_xyz.dump('%s/%s.xyz' % (tempdir, name))
+    model_xyz.to_msgpack('%s/%s.msgpack' % (tempdir, name))
+    with open('%s/%s.summary.yml' % (tempdir, name), 'wb') as f:
+        yaml.dump(model_xyz.summary_dict, codecs.getwriter("utf-8")(f))
 
 
 importers = {entry.name: entry for entry in importlib.metadata.entry_points(group="beryl_pipeline.import")}
@@ -279,6 +333,23 @@ class Import(poltergust_luigi_utils.logging_task.LoggingTask, luigi.Task):
                             msgpackfile = '%s/out.%s.msgpack' % (tempdir, fline),
                             summaryfile = '%s/out.%s.summary.yml' % (tempdir, fline),
                             geojsonfile = '%s/out.%s.geojson' % (tempdir, fline))
+
+                    # Dump GA-LEI model if present
+                    galei_model = getattr(importer, 'galei_model_xyz', None)
+                    if galei_model is not None:
+                        self.log("Write GA-LEI model")
+                        _dump_model_xyz(galei_model, tempdir, "galei_model")
+                        # Copy GEX so get_pipeline_outputs() can find system_data
+                        shutil.copy2(
+                            '%s/out.gex' % (tempdir,),
+                            '%s/galei_model.gex' % (tempdir,))
+                        # Per-flightline splits (needed for GUI binary API)
+                        for fline, line_data in galei_model.split_by_line().items():
+                            fline = slugify.slugify(str(fline), separator="_")
+                            _dump_model_xyz(line_data, tempdir, "galei_model.%s" % fline)
+                            shutil.copy2(
+                                '%s/out.gex' % (tempdir,),
+                                '%s/galei_model.%s.gex' % (tempdir, fline))
 
                 with self.output().open("w") as f:
                     f.write("DONE")                

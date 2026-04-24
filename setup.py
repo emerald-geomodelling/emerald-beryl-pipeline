@@ -5,7 +5,7 @@ import os
 
 setuptools.setup(
     name='emerald-beryl-pipeline',
-    version='0.0.23',
+    version='0.0.25',
     description='',
     long_description="",
     long_description_content_type="text/markdown",

@@ -9,3 +9,12 @@ __pycache__
 *.pickle
 *.idea/
 docs/data
+
+# macOS + venvs
+.DS_Store
+.venv/
+
+# Claude Code — never committed
+.claude/
+CLAUDE.md
+claude.md
